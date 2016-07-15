@@ -3,6 +3,7 @@ require('../models/employee');
 var Employee= mongoose.model('Employee');
 module.exports = function(app){
 	app.get('/home', function (req, res) {
+	    console.log(req.user + "home");
 	    res.json(req.user);
 	});
 

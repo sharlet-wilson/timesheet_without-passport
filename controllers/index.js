@@ -1,11 +1,12 @@
 var mongoose=require('mongoose');
+var bcrypt   = require('bcrypt-nodejs');                  
 require('../models/employee');
 var Employee = mongoose.model('Employee');
 module.exports = function(app){
-	require('./home.js')(app);
+    require('./home.js')(app);
     require('./project.js')(app);
 	app.get('/', function (req, res) {
-	    res.json(req.user);
+        res.json(req.session.userId);
 	});
 
 	app.post('/login',function(req,res){
@@ -21,9 +22,10 @@ module.exports = function(app){
                 console.log("Incorrect password!");
                 return res.json("Incorrect password!");
             }
-            console.log("Login successful!");
-            req.session.user=employee;
-            res.json(req.session.user);
+            req.session.userId = bcrypt.hashSync(employee._id, bcrypt.genSaltSync(8), null);
+            req.session.timestamp = Date.now()/1000;
+            console.log("Login successful!");     
+            res.json(req.session.userId);
         });
     });
 
@@ -39,7 +41,8 @@ module.exports = function(app){
         newEmployee.save(function(err,employee){
             if(err)
                 return (err);
-            req.session.user = employee;
+            req.session.userId = bcrypt.hashSync(employee._id, bcrypt.genSaltSync(8), null);
+            req.session.timestamp = Date.now()/1000;
             res.json(employee);
         });
     });	
